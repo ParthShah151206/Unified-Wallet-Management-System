@@ -1,0 +1,3 @@
+BANK 1
+CRYPTO 1
+CBDC 1

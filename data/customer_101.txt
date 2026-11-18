@@ -1,0 +1,4 @@
+UWMS1
+USER 101 "Rahul Sharma" "rahul@gmail.com"
+WALLETS 0
+TRANSACTIONS 0
