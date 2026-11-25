@@ -6,7 +6,7 @@
 #include "../include/FileManager.h"
 #include "../include/Input.h"
 #include "../include/AssetTypeManager.h"
-
+#include "../include/WalletFactory.h"
 #include <iostream>
 #include <cmath>
 #include <limits>
@@ -42,26 +42,17 @@ Wallet* Customer::findWallet(int walletID) const {
 }
 
 // Create wallet
-void Customer::createWallet(int choice, int walletID, double balance) {
 
-    if (walletID <= 0) {
-        cout << "Wallet ID must be positive!\n";
-        return;
-    }
-
-    if (findWallet(walletID) != nullptr) {
-        cout << "Wallet ID already exists!\n";
-        return;
-    }
-
-    if (!isfinite(balance) || balance < 0) {
-        cout << "Invalid initial balance!\n";
-        return;
-    }
-
+void Customer::createWallet(
+    int choice,
+    int walletID,
+    double balance
+)
+{
     string assetCode;
 
-    switch (choice) {
+    switch (choice)
+    {
         case 1:
             assetCode = "BANK";
             break;
@@ -74,35 +65,33 @@ void Customer::createWallet(int choice, int walletID, double balance) {
             assetCode = "CBDC";
             break;
 
+        case 4:
+            assetCode = "UPI";
+            break;
+
         default:
-            cout << "Invalid wallet type!\n";
+            cout << "Invalid wallet choice!\n";
             return;
     }
 
-    // Check whether Admin has enabled this wallet type
-    if (!AssetTypeManager::isEnabled(assetCode)) {
-        cout << "\nSorry! This wallet type is currently disabled by Admin.\n";
-        cout << "Please select another wallet type.\n";
+    // Check whether the wallet type is enabled
+    if (!AssetTypeManager::isEnabled(assetCode))
+    {
+        cout << assetCode
+             << " wallet is currently disabled by Admin!\n";
         return;
     }
 
-    Wallet* newWallet = nullptr;
+    // Create wallet through Factory
+    Wallet* newWallet = WalletFactory::createWallet(
+        choice,
+        walletID,
+        userID,
+        balance
+    );
 
-    switch (choice) {
-        case 1:
-            newWallet = new BankWallet(walletID, userID, balance, "INR");
-            break;
-
-        case 2:
-            newWallet = new CryptoWallet(walletID, userID, balance, "BTC");
-            break;
-
-        case 3:
-            newWallet = new CBDCWallet(walletID, userID, balance, "INR");
-            break;
-    }
-
-    if (newWallet == nullptr) {
+    if (newWallet == nullptr)
+    {
         cout << "Wallet creation failed!\n";
         return;
     }
@@ -110,7 +99,9 @@ void Customer::createWallet(int choice, int walletID, double balance) {
     wallets.push_back(newWallet);
 
     cout << "\nWallet created successfully!\n";
+    newWallet->displayWallet();
 }
+
 
 // View wallets
 void Customer::viewWallets() const {
@@ -367,7 +358,8 @@ void Customer::displayDashboard() {
                 cout << "1. Bank Wallet\n";
                 cout << "2. Crypto Wallet\n";
                 cout << "3. CBDC Wallet\n";
-
+                cout << "4. UPI Wallet\n";
+                
                 if (!readInt("Select wallet type: ", type))
                     break;
 

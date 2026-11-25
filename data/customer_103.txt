@@ -1,0 +1,4 @@
+UWMS1
+USER 103 "Aksh Shah" "aksh@gmail.com"
+WALLETS 0
+TRANSACTIONS 0

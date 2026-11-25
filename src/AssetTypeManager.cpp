@@ -18,6 +18,7 @@ void AssetTypeManager::loadAssetTypes()
     assetTypes.push_back({"BANK", "Bank Wallet", true});
     assetTypes.push_back({"CRYPTO", "Crypto Wallet", true});
     assetTypes.push_back({"CBDC", "CBDC Wallet", true});
+    assetTypes.push_back({"UPI", "UPI Wallet", true});
 
     ifstream file("data/asset_types.txt");
 
@@ -31,8 +32,13 @@ void AssetTypeManager::loadAssetTypes()
     int status;
 
     while (file >> code >> status) {
+
+        // Update the status of an existing wallet type
         for (auto& asset : assetTypes) {
-            if (asset.code == code && (status == 0 || status == 1)) {
+
+            if (asset.code == code &&
+                (status == 0 || status == 1)) {
+
                 asset.enabled = (status == 1);
                 break;
             }
@@ -52,8 +58,10 @@ bool AssetTypeManager::saveAssetTypes()
     }
 
     for (const auto& asset : assetTypes) {
+
         file << asset.code << " "
-             << (asset.enabled ? 1 : 0) << "\n";
+             << (asset.enabled ? 1 : 0)
+             << "\n";
     }
 
     file.close();
@@ -65,6 +73,7 @@ bool AssetTypeManager::isEnabled(const string& code)
     loadAssetTypes();
 
     for (const auto& asset : assetTypes) {
+
         if (asset.code == code) {
             return asset.enabled;
         }
@@ -78,6 +87,7 @@ void AssetTypeManager::manageAssetTypes()
     loadAssetTypes();
 
     while (true) {
+
         cout << "\n========================================\n";
         cout << "          MANAGE ASSET TYPES             \n";
         cout << "========================================\n";
@@ -88,14 +98,20 @@ void AssetTypeManager::manageAssetTypes()
 
         cout << "----------------------------------------\n";
 
-        for (int i = 0; i < static_cast<int>(assetTypes.size()); i++) {
+        for (int i = 0;
+             i < static_cast<int>(assetTypes.size());
+             i++) {
+
             cout << left << setw(8) << i + 1
                  << setw(20) << assetTypes[i].name
-                 << (assetTypes[i].enabled ? "Enabled" : "Disabled")
+                 << (assetTypes[i].enabled
+                     ? "Enabled"
+                     : "Disabled")
                  << "\n";
         }
 
         cout << "----------------------------------------\n";
+
         cout << "1. Enable an Asset Type\n";
         cout << "2. Disable an Asset Type\n";
         cout << "3. Back to Admin Dashboard\n";
@@ -123,6 +139,7 @@ void AssetTypeManager::manageAssetTypes()
 
         if (assetChoice < 1 ||
             assetChoice > static_cast<int>(assetTypes.size())) {
+
             cout << "\nInvalid asset type number!\n";
             continue;
         }
@@ -132,20 +149,27 @@ void AssetTypeManager::manageAssetTypes()
         bool newStatus = (choice == 1);
 
         if (selected.enabled == newStatus) {
+
             cout << "\n" << selected.name
                  << " is already "
                  << (newStatus ? "enabled" : "disabled")
                  << ".\n";
+
             continue;
         }
 
         selected.enabled = newStatus;
 
         if (saveAssetTypes()) {
+
             cout << "\n" << selected.name
                  << " has been "
                  << (newStatus ? "enabled" : "disabled")
                  << " successfully!\n";
+        }
+        else {
+            // Restore the previous status if saving fails
+            selected.enabled = !newStatus;
         }
     }
 }
